@@ -27,6 +27,13 @@ class DatabaseSeeder extends Seeder
         // Create Platform Admin
         User::create([
             'name' => 'مدير المنصة',
+            'email' => 'superadmin@ranking.com',
+            'password' => Hash::make('admin123'),
+            'role' => 'super_admin',
+        ]);
+
+            User::create([
+            'name' => '  مشرف المنصة',
             'email' => 'admin@ranking.com',
             'password' => Hash::make('admin123'),
             'role' => 'admin',

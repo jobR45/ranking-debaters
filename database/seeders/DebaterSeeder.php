@@ -4,6 +4,8 @@ namespace Database\Seeders;
 
 use App\Models\Debater;
 use App\Models\OfficialScore;
+use App\Models\User;
+use Hash;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -14,6 +16,8 @@ class DebaterSeeder extends Seeder
      */
     public function run(): void
     {
+
+       
         // 1. Debater: حسن عيسى
         $debater1 = Debater::create([
             'name_ar' => 'حسن عيسى',
@@ -52,7 +56,7 @@ class DebaterSeeder extends Seeder
             'total_score' => 46, // 46/100
         ]);
 
-       
+
     }
 
 }

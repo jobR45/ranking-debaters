@@ -13,6 +13,28 @@ class SocialAuthController extends Controller
 {
     protected array $supportedProviders = ['google', 'discord', 'tiktok'];
 
+
+
+    public function login(Request $request)
+    {
+        $credentials = $request->validate([
+            'email' => 'required|email',
+            'password' => 'required|string',
+        ]);
+
+        if (!Auth::attempt($credentials)) {
+            return response()->json(['message' => 'بيانات الدخول غير صحيحة.'], 401);
+        }
+
+        $user = Auth::user();
+        $token = $user->createToken('admin_token')->plainTextToken;
+
+        return response()->json([
+            'token' => $token,
+            'user' => $user
+        ]);
+    }
+
     /**
      * Redirect user to OAuth Provider
      */

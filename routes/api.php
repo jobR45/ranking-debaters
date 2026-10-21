@@ -30,8 +30,41 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 });
 
+  Route::post('/login', [SocialAuthController::class, 'login']);
+
 // Admin-Only Routes
 Route::middleware(['auth:sanctum', \App\Http\Middleware\EnsureUserIsAdmin::class])->group(function () {
     Route::post('/official-reviews', [DebaterReviewController::class, 'store']);
     Route::put('/debaters/{id}/official-score', [DebaterController::class, 'updateOfficialScore']);
+});
+
+
+// Super Admin Only Routes
+Route::middleware([\App\Http\Middleware\EnsureUserIsSuperAdmin::class])->group(function () {
+    Route::post('/users', [\App\Http\Controllers\Api\Admin\UserAdminController::class, 'store']); // <--- ADD THIS
+    Route::put('/users/{id}/role', [\App\Http\Controllers\Api\Admin\UserAdminController::class, 'updateRole']);
+    Route::delete('/users/{id}', [\App\Http\Controllers\Api\Admin\UserAdminController::class, 'destroy']);
+});
+
+// Admin Management Routes
+Route::middleware(['auth:sanctum', \App\Http\Middleware\EnsureUserIsAdmin::class])->prefix('admin')->group(function () {
+    
+    // Debaters Management
+    Route::get('/debaters', [\App\Http\Controllers\Api\Admin\DebaterAdminController::class, 'index']);
+    Route::post('/debaters', [\App\Http\Controllers\Api\Admin\DebaterAdminController::class, 'store']);
+    Route::put('/debaters/{id}', [\App\Http\Controllers\Api\Admin\DebaterAdminController::class, 'update']);
+    Route::delete('/debaters/{id}', [\App\Http\Controllers\Api\Admin\DebaterAdminController::class, 'destroy']);
+
+    // Official Reviews & Scores Management
+    Route::post('/debaters/{id}/official-review', [\App\Http\Controllers\Api\Admin\OfficialReviewAdminController::class, 'storeOrUpdate']);
+    Route::post('/debaters/{id}/official-score', [\App\Http\Controllers\Api\Admin\OfficialScoreAdminController::class, 'storeOrUpdate']);
+
+    // Audience Reviews Moderation
+    Route::get('/audience-reviews', [\App\Http\Controllers\Api\Admin\AudienceReviewAdminController::class, 'index']);
+    Route::delete('/audience-reviews/{id}', [\App\Http\Controllers\Api\Admin\AudienceReviewAdminController::class, 'destroy']);
+
+    // Users Management (Super Admin Only for role changes)
+    Route::get('/users', [\App\Http\Controllers\Api\Admin\UserAdminController::class, 'index']);
+   
+  
 });

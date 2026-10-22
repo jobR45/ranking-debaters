@@ -22,12 +22,14 @@ export const useAuth = () => {
 
   const isAuthenticated = computed(() => !!state.token)
   const isAdmin = computed(() => state.user && (state.user.role === 'admin' || state.user.role === 'super_admin'))
+  const isSuperAdmin = computed(() => state.user && state.user.role === 'super_admin')
 
   return {
     state,
     setAuth,
     logout,
     isAuthenticated,
-    isAdmin
+    isAdmin,
+    isSuperAdmin
   }
 }

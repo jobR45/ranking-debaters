@@ -110,6 +110,7 @@ const fetchUsers = async (page = 1) => {
 
 const changeRole = async (userId, newRole) => {
   const token = localStorage.getItem('token')
+  console.log(token, 'token')
   const res = await fetch(`/api/admin/users/${userId}/role`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },

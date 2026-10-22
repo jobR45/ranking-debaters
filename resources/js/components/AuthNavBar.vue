@@ -15,7 +15,11 @@
                     auth.state.user?.name
                 }}</span>
                 <span class="text-[10px] text-amber-400 font-semibold">{{
-                    auth.isAdmin.value ? "مدير المنصة (Admin)" : "مستخدم مسجل"
+                    auth.isSuperAdmin.value
+                        ? "مدير المنصة (Super Admin)"
+                        : auth.isAdmin.value
+                          ? "مشرف المنصة (Admin)"
+                          : "مستخدم عادي (User)"
                 }}</span>
             </div>
             <button

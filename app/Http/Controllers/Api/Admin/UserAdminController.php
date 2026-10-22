@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use Hash;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -34,6 +35,7 @@ class UserAdminController extends Controller
             'role' => 'required|in:super_admin,admin',
         ]);
 
+       
         $user = User::create([
             'name' => $validated['name'],
             'email' => $validated['email'],

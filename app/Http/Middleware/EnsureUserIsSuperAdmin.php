@@ -15,12 +15,13 @@ class EnsureUserIsSuperAdmin
      */
     public function handle(Request $request, Closure $next): Response
     {
-      if (!$request->user() || !$request->user()->isSuperAdmin()) {
+        // Check if user is logged in first, then check role
+        if (!$request->user() || !$request->user()->isSuperAdmin()) {
             return response()->json([
                 'message' => 'عفواً، هذه الصلاحية مخصصة لمدير النظام الرئيسي (Super Admin) فقط.'
             ], 403);
         }
 
         return $next($request);
-    }
+    }   
 }

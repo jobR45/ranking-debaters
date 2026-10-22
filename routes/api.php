@@ -46,7 +46,7 @@ Route::middleware(['auth:sanctum', EnsureUserIsAdmin::class])->group(function ()
 });
 
 // Super Admin Only Routes
-Route::middleware([EnsureUserIsSuperAdmin::class])->group(function () {
+Route::middleware([EnsureUserIsSuperAdmin::class])->prefix('admin')->group(function () {
     Route::post('/users', [UserAdminController::class, 'store']); // <--- ADD THIS
     Route::put('/users/{id}/role', [UserAdminController::class, 'updateRole']);
     Route::delete('/users/{id}', [UserAdminController::class, 'destroy']);

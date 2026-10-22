@@ -4,10 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class DebaterReview extends Model
 {
-   use HasFactory;
+    use HasFactory;
 
     protected $fillable = [
         'debater_id',
@@ -17,7 +18,7 @@ class DebaterReview extends Model
         'likes_count',
     ];
 
-    public function debater()
+    public function debater(): BelongsTo
     {
         return $this->belongsTo(Debater::class);
     }

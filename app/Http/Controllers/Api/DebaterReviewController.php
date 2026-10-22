@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 
 class DebaterReviewController extends Controller
 {
-   // Fetch all debate reviews with debater info
+    // Fetch all debate reviews with debater info
     public function index()
     {
         $reviews = DebaterReview::with('debater')
@@ -28,11 +28,18 @@ class DebaterReviewController extends Controller
             'video_url' => 'nullable|url',
         ]);
 
-        $review = DebaterReview::create($validated);
+        $review = DebaterReview::updateOrCreate(
+            ['debater_id' => $validated['debater_id']],
+            [
+                'title' => $validated['title'],
+                'written_review' => $validated['written_review'],
+                'video_url' => $validated['video_url'] ?? null,
+            ],
+        );
 
         return response()->json([
             'message' => 'تم إضافة مراجعة المناظرة بنجاح',
-            'review' => $review->load('debater')
+            'review' => $review->load('debater'),
         ], 210);
     }
 
@@ -44,7 +51,7 @@ class DebaterReviewController extends Controller
 
         return response()->json([
             'message' => 'تم تسجيل الإعجاب',
-            'likes_count' => $review->likes_count
+            'likes_count' => $review->likes_count,
         ]);
     }
 }

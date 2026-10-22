@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class UserAdminController extends Controller
@@ -11,9 +12,13 @@ class UserAdminController extends Controller
     /**
      * List all platform users
      */
-    public function index()
+    public function index(Request $request): JsonResponse
     {
-        $users = User::latest()->get(['id', 'name', 'email', 'role', 'created_at']);
+        $perPage = min(max($request->integer('per_page', 10), 1), 100);
+        $users = User::latest()
+            ->paginate($perPage, ['id', 'name', 'email', 'role', 'created_at'])
+            ->withQueryString();
+
         return response()->json($users);
     }
 
@@ -38,17 +43,17 @@ class UserAdminController extends Controller
 
         return response()->json([
             'message' => 'تم إنشاء حساب المسؤول بنجاح.',
-            'user' => $user
+            'user' => $user,
         ], 201);
     }
-    
+
     /**
      * Update user role (Super Admin Only)
      */
     public function updateRole(Request $request, $id)
     {
         $validated = $request->validate([
-            'role' => 'required|in:super_admin,admin,user'
+            'role' => 'required|in:super_admin,admin,user',
         ]);
 
         $user = User::findOrFail($id);
@@ -62,7 +67,7 @@ class UserAdminController extends Controller
 
         return response()->json([
             'message' => 'تم تغيير دور المستخدم بنجاح.',
-            'user' => $user
+            'user' => $user,
         ]);
     }
 

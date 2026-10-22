@@ -17,6 +17,7 @@ class DebaterController extends Controller
                 // Calculate average audience score
                 $audienceAvg = $debater->audienceReviews->avg('total_score');
                 $debater->audience_score = $audienceAvg ? round($audienceAvg) : null;
+
                 return $debater;
             })
             ->sortByDesc('officialScore.total_score')
@@ -35,7 +36,7 @@ class DebaterController extends Controller
 
         if ($existingReview) {
             return response()->json([
-                'message' => 'لقد قمت بتقييم هذا المناظر مسبقاً. لا يمكنك إرسال أكثر من تقييم.'
+                'message' => 'لقد قمت بتقييم هذا المناظر مسبقاً. لا يمكنك إرسال أكثر من تقييم.',
             ], 422);
         }
 
@@ -129,8 +130,16 @@ class DebaterController extends Controller
     // Fetch single debater with all related details
     public function show($id)
     {
-        $debater = Debater::with(['officialScore', 'debaterReviews'])
+        $debater = Debater::with(['officialScore', 'debaterReview'])
+            ->withAvg('audienceReviews', 'total_score')
             ->findOrFail($id);
+        $debater->setAttribute(
+            'audience_score',
+            $debater->audience_reviews_avg_total_score === null
+                ? null
+                : (int) round($debater->audience_reviews_avg_total_score),
+        );
+        $debater->makeHidden('audience_reviews_avg_total_score');
 
         return response()->json($debater);
     }

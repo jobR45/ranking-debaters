@@ -15,9 +15,6 @@
         <router-link to="/admin/debaters" class="flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold transition hover:bg-gray-800" active-class="bg-amber-500/10 text-amber-400 border border-amber-500/20">
           👥 إدارة المناظرين
         </router-link>
-        <router-link to="/admin/reviews" class="flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold transition hover:bg-gray-800" active-class="bg-amber-500/10 text-amber-400 border border-amber-500/20">
-          📝 المراجعات والدرجات الرسمية
-        </router-link>
         <router-link to="/admin/audience-reviews" class="flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold transition hover:bg-gray-800" active-class="bg-amber-500/10 text-amber-400 border border-amber-500/20">
           💬 مراجعات الجمهور
         </router-link>

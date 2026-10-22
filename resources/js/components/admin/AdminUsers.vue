@@ -42,6 +42,7 @@
         </tbody>
       </table>
     </div>
+    <AdminPagination :pagination="pagination" @change="fetchUsers" />
 
     <!-- Add Admin Modal (Super Admin Only) -->
     <div v-if="isModalOpen" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
@@ -82,16 +83,29 @@
 import { ref, onMounted } from 'vue'
 import { useAuth } from '../../store/auth.js'
 import { toast } from 'vue3-toastify'
+import AdminPagination from './AdminPagination.vue'
 
 const auth = useAuth()
 const users = ref([])
+const pagination = ref({ current_page: 1, last_page: 1, from: 0, to: 0, total: 0 })
 const isModalOpen = ref(false)
 const form = ref({ name: '', email: '', password: '', role: 'admin' })
 
-const fetchUsers = async () => {
+const fetchUsers = async (page = 1) => {
   const token = localStorage.getItem('token')
-  const res = await fetch('/api/admin/users', { headers: { Authorization: `Bearer ${token}` } })
-  if (res.ok) users.value = await res.json()
+  const res = await fetch(`/api/admin/users?page=${page}`, { headers: { Authorization: `Bearer ${token}` } })
+  if (!res.ok) {
+    console.error('Failed to load users:', res.status)
+    return
+  }
+
+  const data = await res.json()
+  if (page > data.last_page && data.last_page > 0) {
+    return fetchUsers(data.last_page)
+  }
+
+  users.value = data.data
+  pagination.value = data
 }
 
 const changeRole = async (userId, newRole) => {

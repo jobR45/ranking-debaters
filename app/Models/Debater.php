@@ -4,13 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Schema\Blueprint;
-use Schema;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Debater extends Model
 {
-
-
     use HasFactory;
 
     protected $fillable = [
@@ -28,19 +26,18 @@ class Debater extends Model
         'social_links' => 'array',
     ];
 
-    public function officialScore()
+    public function officialScore(): HasOne
     {
         return $this->hasOne(OfficialScore::class);
     }
 
-    public function audienceReviews()
+    public function debaterReview(): HasOne
+    {
+        return $this->hasOne(DebaterReview::class);
+    }
+
+    public function audienceReviews(): HasMany
     {
         return $this->hasMany(AudienceReview::class);
     }
-
-    public function debaterReviews()
-    {
-        return $this->hasMany(DebaterReview::class);
-    }
-
 }

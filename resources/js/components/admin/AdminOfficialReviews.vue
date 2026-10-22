@@ -71,6 +71,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { toast } from 'vue3-toastify'
+import { fetchAllPaginatedData } from '../../utils/paginatedData.js'
 
 const debaters = ref([])
 const selectedDebaterId = ref('')
@@ -80,8 +81,13 @@ const reviewForm = ref({ title: '', video_url: '', written_review: '' })
 
 onMounted(async () => {
   const token = localStorage.getItem('token')
-  const res = await fetch('/api/admin/debaters', { headers: { Authorization: `Bearer ${token}` } })
-  if (res.ok) debaters.value = await res.json()
+  try {
+    debaters.value = await fetchAllPaginatedData('/api/admin/debaters', {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+  } catch (error) {
+    console.error('Failed to load debaters:', error)
+  }
 })
 
 const loadDebaterDetails = async () => {

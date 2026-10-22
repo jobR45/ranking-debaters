@@ -1,121 +1,127 @@
 <template>
   <div>
-    <div class="flex justify-between items-center mb-6">
-      <h2 class="text-xl font-bold text-white">👥 إدارة المناظرين</h2>
-      <button @click="openModal()" class="bg-amber-500 hover:bg-amber-600 text-gray-950 font-bold text-xs px-4 py-2.5 rounded-xl transition cursor-pointer">
-        + إضافة مناظر جديد
-      </button>
+    <div class="mb-6 flex items-center justify-between gap-4">
+      <div>
+        <h2 class="text-xl font-bold text-white">إدارة المناظرين</h2>
+        <p class="mt-1 text-xs text-gray-400">اختر مناظرًا لإدارة بياناته ودرجاته ومراجعته الرسمية.</p>
+      </div>
+      <router-link
+        :to="{ name: 'AdminDebaterDetails', params: { id: 'new' } }"
+        class="shrink-0 rounded-xl bg-amber-500 px-4 py-2.5 text-xs font-bold text-gray-950 transition hover:bg-amber-600"
+      >
+        + إضافة مناظر
+      </router-link>
     </div>
 
-    <!-- Debaters Table -->
-    <div class="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden">
+    <div class="overflow-hidden rounded-2xl border border-gray-800 bg-gray-900">
       <table class="w-full text-right text-xs">
-        <thead class="bg-gray-950 text-gray-400 border-b border-gray-800">
+        <thead class="border-b border-gray-800 bg-gray-950 text-gray-400">
           <tr>
             <th class="p-4">المناظر</th>
             <th class="p-4">الدولة</th>
             <th class="p-4">النتيجة الرسمية</th>
+            <th class="p-4">المراجعة الرسمية</th>
             <th class="p-4 text-center">الإجراءات</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-gray-800">
-          <tr v-for="d in debaters" :key="d.id" class="hover:bg-gray-850/50">
-            <td class="p-4 font-bold text-white">{{ d.name_ar }}</td>
-            <td class="p-4 text-gray-400">{{ d.country_code }}</td>
-            <td class="p-4 font-bold text-amber-400">{{ d.official_score?.total_score || 'غير محدد' }}</td>
-            <td class="p-4 text-center space-x-2 space-x-reverse">
-              <button @click="openModal(d)" class="text-amber-400 hover:text-amber-300 font-semibold px-2 py-1 bg-amber-500/10 rounded-lg">تعديل</button>
-              <button @click="deleteDebater(d.id)" class="text-red-400 hover:text-red-300 font-semibold px-2 py-1 bg-red-500/10 rounded-lg">حذف</button>
+          <tr v-if="debaters.length === 0">
+            <td colspan="5" class="p-6 text-center text-gray-500">لا يوجد مناظرون بعد.</td>
+          </tr>
+          <tr
+            v-for="debater in debaters"
+            :key="debater.id"
+            class="transition hover:bg-gray-800/50"
+          >
+            <td class="p-4 font-bold text-white">
+              <router-link
+                :to="{ name: 'AdminDebaterDetails', params: { id: debater.id } }"
+                class="flex items-center gap-3 hover:text-amber-400"
+              >
+                <img
+                  v-if="debater.photo_url"
+                  :src="debater.photo_url"
+                  :alt="debater.name_ar"
+                  class="h-10 w-10 rounded-full border border-gray-700 object-cover"
+                />
+                <span
+                  v-else
+                  class="flex h-10 w-10 items-center justify-center rounded-full bg-gray-800 text-base text-amber-400"
+                >
+                  {{ debater.name_ar?.charAt(0) }}
+                </span>
+                {{ debater.name_ar }}
+              </router-link>
+            </td>
+            <td class="p-4 text-gray-400">{{ debater.country_code || '—' }}</td>
+            <td class="p-4 font-bold text-amber-400">
+              {{ debater.official_score?.total_score ?? 'غير محدد' }}
+            </td>
+            <td class="p-4 text-gray-400">
+              {{ debater.debater_review ? 'مضافة' : 'غير مضافة' }}
+            </td>
+            <td class="p-4 text-center">
+              <button
+                type="button"
+                class="rounded-lg bg-red-500/10 px-2 py-1 font-semibold text-red-400 hover:text-red-300"
+                @click="deleteDebater(debater.id)"
+              >
+                حذف
+              </button>
             </td>
           </tr>
         </tbody>
       </table>
     </div>
 
-    <!-- Add/Edit Modal -->
-    <div v-if="isModalOpen" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6 w-full max-w-lg shadow-2xl relative">
-        <button @click="isModalOpen = false" class="absolute top-4 left-4 text-gray-400 hover:text-white">✕</button>
-        <h3 class="text-base font-bold text-white mb-4">{{ editingId ? 'تعديل مناظر' : 'إضافة مناظر جديد' }}</h3>
-
-        <form @submit.prevent="saveDebater" class="space-y-4">
-          <div>
-            <label class="block text-xs font-semibold text-gray-300 mb-1">الاسم باللغة العربية</label>
-            <input v-model="form.name_ar" required type="text" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-4 py-2.5 text-xs text-white" />
-          </div>
-          <div>
-            <label class="block text-xs font-semibold text-gray-300 mb-1">رمز الدولة (مثال: EG, SA, IQ)</label>
-            <input v-model="form.country_code" required type="text" maxlength="2" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-4 py-2.5 text-xs text-white" />
-          </div>
-          <div>
-            <label class="block text-xs font-semibold text-gray-300 mb-1">السيرة الذاتية</label>
-            <textarea v-model="form.bio" rows="3" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-4 py-2.5 text-xs text-white"></textarea>
-          </div>
-          <button type="submit" class="w-full bg-amber-500 hover:bg-amber-600 text-gray-950 font-bold text-xs py-3 rounded-xl transition">
-            حفظ البيانات
-          </button>
-        </form>
-      </div>
-    </div>
+    <AdminPagination :pagination="pagination" @change="fetchDebaters" />
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { onMounted, ref } from 'vue'
 import { toast } from 'vue3-toastify'
+import AdminPagination from './AdminPagination.vue'
 
 const debaters = ref([])
-const isModalOpen = ref(false)
-const editingId = ref(null)
-const form = ref({ name_ar: '', country_code: 'EG', bio: '' })
+const pagination = ref({ current_page: 1, last_page: 1, from: 0, to: 0, total: 0 })
 
-const fetchDebaters = async () => {
+const fetchDebaters = async (page = 1) => {
   const token = localStorage.getItem('token')
-  const res = await fetch('/api/admin/debaters', { headers: { Authorization: `Bearer ${token}` } })
-  if (res.ok) debaters.value = await res.json()
-}
-
-const openModal = (debater = null) => {
-  if (debater) {
-    editingId.value = debater.id
-    form.value = { name_ar: debater.name_ar, country_code: debater.country_code, bio: debater.bio }
-  } else {
-    editingId.value = null
-    form.value = { name_ar: '', country_code: 'EG', bio: '' }
-  }
-  isModalOpen.value = true
-}
-
-const saveDebater = async () => {
-  const token = localStorage.getItem('token')
-  const url = editingId.value ? `/api/admin/debaters/${editingId.value}` : '/api/admin/debaters'
-  const method = editingId.value ? 'PUT' : 'POST'
-
-  const res = await fetch(url, {
-    method,
-    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-    body: JSON.stringify(form.value)
+  const response = await fetch(`/api/admin/debaters?page=${page}`, {
+    headers: { Authorization: `Bearer ${token}` }
   })
 
-  if (res.ok) {
-    toast.success(editingId.value ? 'تم التعديل بنجاح' : 'تمت الإضافة بنجاح')
-    isModalOpen.value = false
-    fetchDebaters()
-  } else {
-    toast.error('حدث خطأ أثناء حفظ البيانات')
+  if (!response.ok) {
+    console.error('Failed to load debaters:', response.status)
+    toast.error('تعذر تحميل قائمة المناظرين')
+    return
   }
+
+  const data = await response.json()
+  if (page > data.last_page && data.last_page > 0) {
+    return fetchDebaters(data.last_page)
+  }
+
+  debaters.value = data.data
+  pagination.value = data
 }
 
 const deleteDebater = async (id) => {
-  if (!confirm('هل أنت تأكد من رغبتك في حذف هذا المناظر؟')) return
+  if (!confirm('هل أنت متأكد من رغبتك في حذف هذا المناظر؟')) return
+
   const token = localStorage.getItem('token')
-  const res = await fetch(`/api/admin/debaters/${id}`, {
+  const response = await fetch(`/api/admin/debaters/${id}`, {
     method: 'DELETE',
     headers: { Authorization: `Bearer ${token}` }
   })
-  if (res.ok) {
-    toast.success('تم الحذف بنجاح')
-    fetchDebaters()
+
+  if (response.ok) {
+    toast.success('تم حذف المناظر بنجاح')
+    await fetchDebaters(pagination.value.current_page)
+  } else {
+    console.error('Failed to delete debater:', response.status)
+    toast.error('تعذر حذف المناظر')
   }
 }
 

@@ -168,33 +168,30 @@
 
                         <div
                             v-if="
-                                debater.debater_reviews &&
-                                debater.debater_reviews.length > 0
+                                debater.debater_review
                             "
                             class="space-y-6"
                         >
                             <div
-                                v-for="review in debater.debater_reviews"
-                                :key="review.id"
                                 class="bg-gray-800/40 border border-gray-800 rounded-xl p-5"
                             >
                                 <h3
                                     class="text-lg font-bold text-amber-400 mb-3"
                                 >
-                                    {{ review.title }}
+                                    {{ debater.debater_review.title }}
                                 </h3>
 
                                 <!-- Formatted Markdown Content (Bold Topics + Ordered List) -->
                                 <WrittenReview
-                                    :content="review.written_review"
+                                    :content="debater.debater_review.written_review"
                                 />
 
                                 <div
-                                    v-if="review.video_url"
+                                    v-if="debater.debater_review.video_url"
                                     class="mt-4 pt-3 border-t border-gray-800/80 flex items-center justify-between"
                                 >
                                     <a
-                                        :href="review.video_url"
+                                        :href="debater.debater_review.video_url"
                                         target="_blank"
                                         class="text-xs text-blue-400 hover:text-blue-300 font-semibold flex items-center gap-1"
                                     >
@@ -203,7 +200,7 @@
                                     </a>
                                     <span class="text-xs text-gray-500"
                                         >❤️
-                                        {{ review.likes_count || 0 }}
+                                        {{ debater.debater_review.likes_count || 0 }}
                                         إعجاب</span
                                     >
                                 </div>

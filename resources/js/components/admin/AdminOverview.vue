@@ -10,7 +10,7 @@
       </div>
 
       <div class="bg-gray-900 border border-gray-800 p-5 rounded-2xl">
-        <span class="text-xs text-gray-400 block mb-1">المراجعات الرسمية</span>
+        <span class="text-xs text-gray-400 block mb-1">مراجعات المناظرين</span>
         <span class="text-2xl font-black text-blue-400">{{ stats.officialReviewsCount }}</span>
       </div>
 
@@ -48,15 +48,16 @@ onMounted(async () => {
 
     if (debatersRes.ok) {
       const debaters = await debatersRes.json()
-      stats.value.debatersCount = debaters.length
+      stats.value.debatersCount = debaters.total
+      stats.value.officialReviewsCount = debaters.official_reviews_count
     }
     if (audienceRes.ok) {
       const reviews = await audienceRes.json()
-      stats.value.audienceReviewsCount = reviews.length
+      stats.value.audienceReviewsCount = reviews.total
     }
     if (usersRes.ok) {
       const users = await usersRes.json()
-      stats.value.usersCount = users.length
+      stats.value.usersCount = users.total
     }
   } catch (err) {
     console.error('Error loading overview stats:', err)

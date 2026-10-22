@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
-
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
 class AudienceReview extends Model
 {
     use HasFactory;
@@ -29,5 +29,13 @@ class AudienceReview extends Model
     public function debater()
     {
         return $this->belongsTo(Debater::class);
+    }
+
+    /**
+     * Relationship to the User model
+     */
+    public function user()
+    {
+        return $this->belongsTo(User::class);
     }
 }

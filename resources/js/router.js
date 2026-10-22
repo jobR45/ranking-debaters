@@ -9,7 +9,7 @@ import AdminLogin from './components/admin/AdminLogin.vue'
 import AdminLayout from './components/admin/AdminLayout.vue' 
 import AdminOverview from './components/admin/AdminOverview.vue' 
 import AdminDebaters from './components/admin/AdminDebaters.vue'
-import AdminOfficialReviews from './components/admin/AdminOfficialReviews.vue' 
+import AdminDebaterDetails from './components/admin/AdminDebaterDetails.vue'
 import AdminAudienceReviews from './components/admin/AdminAudienceReviews.vue' 
 import AdminUsers from './components/admin/AdminUsers.vue' 
 import { useAuth } from './store/auth.js' 
@@ -23,7 +23,7 @@ const routes = [
   },
   {
     path: '/debaters/:id',
-    name: 'DebaterProfile',
+     name: 'debater.show',
     component: DebaterProfile,
     props: true
   },
@@ -39,7 +39,8 @@ const routes = [
     children: [
       { path: '', name: 'AdminOverview', component: AdminOverview },
       { path: 'debaters', name: 'AdminDebaters', component: AdminDebaters },
-      { path: 'reviews', name: 'AdminOfficialReviews', component: AdminOfficialReviews },
+      { path: 'debaters/:id', name: 'AdminDebaterDetails', component: AdminDebaterDetails, props: true },
+      { path: 'reviews', redirect: { name: 'AdminDebaters' } },
       { path: 'audience-reviews', name: 'AdminAudienceReviews', component: AdminAudienceReviews },
       { path: 'users', name: 'AdminUsers', component: AdminUsers },
     ]

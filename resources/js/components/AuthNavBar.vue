@@ -98,7 +98,27 @@ import { useAuth } from "../store/auth.js";
 const auth = useAuth();
 const isModalOpen = ref(false);
 
+const urlParams = new URLSearchParams(window.location.search);
+const token = urlParams.get("token");
+const userParam = urlParams.get("user");
+
+if (token && userParam) {
+    try {
+        const user = JSON.parse(decodeURIComponent(userParam));
+        auth.setAuth(user, token);
+        window.history.replaceState(
+            {},
+            document.title,
+            window.location.pathname,
+        );
+    } catch (e) {
+        console.error("Failed to parse user session", e);
+    }
+}
 const handleLogout = () => {
+    // Clean up URL parameters
+    window.history.replaceState({}, document.title, window.location.pathname);
+
     auth.logout();
     window.location.reload();
 };

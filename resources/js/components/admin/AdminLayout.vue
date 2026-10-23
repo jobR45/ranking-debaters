@@ -26,7 +26,7 @@
                 <router-link
                     to="/admin"
                     class="flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold transition hover:bg-gray-800"
-                    active-class="bg-amber-500/10 text-amber-400 border border-amber-500/20"
+                    exact-active-class="bg-amber-500/10 text-amber-400 border border-amber-500/20"
                 >
                     📊 نظرة عامة
                 </router-link>

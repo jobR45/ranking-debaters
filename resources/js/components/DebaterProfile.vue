@@ -4,21 +4,6 @@
         class="min-h-screen bg-gray-950 text-gray-100 font-['Cairo'] pb-16"
         dir="rtl"
     >
-        <!-- Top Header Navigation -->
-        <header
-            class="bg-gray-900 border-b border-gray-800 py-4 px-6 sticky top-0 z-10 flex justify-between items-center"
-        >
-            <router-link
-                to="/"
-                class="flex items-center gap-2 bg-gray-800 hover:bg-gray-700 text-amber-400 px-4 py-2 rounded-xl text-xs font-bold transition shadow-sm"
-            >
-                ➔ العودة إلى الترتيب العام
-            </router-link>
-
-            <!-- Login / User Profile Component -->
-            <AuthNavbar />
-        </header>
-
         <div class="max-w-6xl mx-auto px-6 mt-8">
             <!-- Debater Overview Header Card -->
             <div
@@ -425,7 +410,6 @@ import Dialog from "primevue/dialog";
 import InputNumber from "primevue/inputnumber";
 import Paginator from "primevue/paginator";
 import Textarea from "primevue/textarea";
-import AuthNavbar from "./AuthNavbar.vue";
 import WrittenReview from "./WrittenReview.vue";
 import { useAuth } from "../store/auth.js";
 

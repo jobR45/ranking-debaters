@@ -6,14 +6,11 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-
 use Laravel\Socialite\Facades\Socialite;
 
 class SocialAuthController extends Controller
 {
     protected array $supportedProviders = ['google', 'discord', 'tiktok'];
-
-
 
     public function login(Request $request)
     {
@@ -44,7 +41,13 @@ class SocialAuthController extends Controller
             return response()->json(['message' => 'مزود التسجيل غير مدعوم.'], 400);
         }
 
-        return Socialite::driver($provider)->stateless()->redirect();
+        // Use method_exists check to avoid static analyzer errors for stateless()
+        $driver = Socialite::driver($provider);
+        if (method_exists($driver, 'stateless')) {
+            return $driver->stateless()->redirect();
+        }
+
+        return $driver->redirect();
     }
 
     /**
@@ -57,7 +60,10 @@ class SocialAuthController extends Controller
         }
 
         try {
-            $socialUser = Socialite::driver($provider)->stateless()->user();
+            $driver = Socialite::driver($provider);
+            $socialUser = method_exists($driver, 'stateless') 
+                ? $driver->stateless()->user() 
+                : $driver->user();
         } catch (\Exception $e) {
             return redirect('/?error=auth_failed');
         }
@@ -80,7 +86,7 @@ class SocialAuthController extends Controller
                 'role' => 'user', // Default audience user
                 $providerIdColumn => $socialUser->getId(),
                 'avatar' => $socialUser->getAvatar(),
-                'password' => null, // Social users do not require a password
+                'password' => null,
             ]);
         } else {
             // Update existing user with Social ID and Avatar if missing
@@ -90,13 +96,13 @@ class SocialAuthController extends Controller
             ]);
         }
 
-        // Log the user into Laravel session / Sanctum
-        Auth::login($user, true);
-
         // Issue Sanctum API token
         $token = $user->createToken('auth_token')->plainTextToken;
 
-        // Redirect back to frontendSPA with token
-        return redirect('/?token=' . $token);
+        // Encode user payload so frontend gets the correct role immediately
+        $userData = urlencode(json_encode($user));
+
+        // Redirect back to frontend SPA with BOTH token and user object
+        return redirect("/?token={$token}&user={$userData}");
     }
 }

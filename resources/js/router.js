@@ -1,8 +1,10 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import PublicLayout from './components/PublicLayout.vue'
+import Welcome from './components/Welcome.vue'
 import DebaterRanking from './components/DebaterRanking.vue' 
 import DebaterProfile from './components/DebaterProfile.vue' 
-
-
+import Debates from './components/Debates.vue'
+import HowWeRank from './components/HowWeRank.vue'
 
 // Admin Views
 import AdminLogin from './components/admin/AdminLogin.vue'
@@ -14,18 +16,38 @@ import AdminAudienceReviews from './components/admin/AdminAudienceReviews.vue'
 import AdminUsers from './components/admin/AdminUsers.vue' 
 import { useAuth } from './store/auth.js' 
 
-
 const routes = [
   {
     path: '/',
-    name: 'home',
-    component: DebaterRanking
-  },
-  {
-    path: '/debaters/:id',
-     name: 'debater.show',
-    component: DebaterProfile,
-    props: true
+    component: PublicLayout,
+    children: [
+      {
+        path: '',
+        name: 'Welcome',
+        component: Welcome
+      },
+      {
+        path: 'ranking',
+        name: 'DebaterRanking',
+        component: DebaterRanking
+      },
+      {
+        path: 'debates',
+        name: 'Debates',
+        component: Debates
+      },
+      {
+        path: 'how-we-rank',
+        name: 'HowWeRank',
+        component: HowWeRank
+      },
+      {
+        path: 'debaters/:id',
+        name: 'DebaterProfile',
+        component: DebaterProfile,
+        props: true
+      }
+    ]
   },
 
   // Admin Login Route
@@ -37,7 +59,7 @@ const routes = [
     component: AdminLayout,
     meta: { requiresAdmin: true },
     children: [
-      { path: '', name: 'AdminOverview', component: AdminOverview },
+    { path: '', name: 'AdminOverview', component: AdminOverview },
       { path: 'debaters', name: 'AdminDebaters', component: AdminDebaters },
       { path: 'debaters/:id', name: 'AdminDebaterDetails', component: AdminDebaterDetails, props: true },
       { path: 'reviews', redirect: { name: 'AdminDebaters' } },
@@ -49,31 +71,70 @@ const routes = [
   // Fallback Catch-all
   { path: '/:pathMatch(.*)*', redirect: '/' }
 ]
+
 const router = createRouter({
   history: createWebHistory(),
   routes
 })
 
-// Navigation Guard: Protect /admin routes
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
   const auth = useAuth()
-  
-  // Read token & user directly to guarantee no timing sync delay
-  const token = localStorage.getItem('token') || auth.state.token
-  const user = JSON.parse(localStorage.getItem('user') || 'null') || auth.state.user
+
+  // 1. Resolve OAuth callbacks before using any previously stored identity.
+  const urlParams = new URLSearchParams(window.location.search)
+  const tokenParam = urlParams.get('token')
+
+  if (tokenParam) {
+    auth.logout()
+    window.history.replaceState({}, document.title, window.location.pathname)
+
+    try {
+      const response = await fetch('/api/user/me', {
+        headers: { Authorization: `Bearer ${tokenParam}` }
+      })
+
+      if (!response.ok) {
+        throw new Error(`OAuth user lookup failed with status ${response.status}`)
+      }
+
+      const user = await response.json()
+      auth.setAuth(user, tokenParam)
+    } catch (error) {
+      auth.logout()
+      console.error('Failed to complete OAuth login:', error)
+    }
+  }
+
+  // 2. Always read the LATEST values from localStorage
+  const token = localStorage.getItem('token')
+  const user = JSON.parse(localStorage.getItem('user') || 'null')
 
   const isUserAuthenticated = !!token
   const isUserAdmin = user && (user.role === 'admin' || user.role === 'super_admin')
 
+  // 3. Validate route permissions
   if (to.meta.requiresAdmin) {
     if (!isUserAuthenticated || !isUserAdmin) {
-      console.log('Access denied. Redirecting to admin login.')
+      auth.logout()
+      return next({ name: 'AdminLogin' })
+    }
+
+    // Optional: Validate token with backend
+    try {
+      const res = await fetch('/api/user/me', {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      if (!res.ok) {
+        auth.logout()
+        return next({ name: 'AdminLogin' })
+      }
+    } catch (err) {
+      auth.logout()
       return next({ name: 'AdminLogin' })
     }
   }
 
   if (to.name === 'AdminLogin' && isUserAuthenticated && isUserAdmin) {
-    console.log('Already logged in as admin. Redirecting to admin dashboard.')
     return next({ name: 'AdminOverview' })
   }
 

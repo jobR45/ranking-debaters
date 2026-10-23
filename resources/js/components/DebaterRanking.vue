@@ -3,22 +3,6 @@
         class="min-h-screen bg-gray-950 text-gray-100 font-['Cairo'] pb-16"
         dir="rtl"
     >
-        <!-- Hero / Header Section -->
-         <header
-            class="bg-gray-900 border-b border-gray-800 py-4 px-6 sticky top-0 z-10 flex justify-between items-center"
-        >
-            <router-link
-                to="/"
-                class="flex items-center gap-2 bg-gray-800 hover:bg-gray-700 text-amber-400 px-4 py-2 rounded-xl text-xs font-bold transition shadow-sm"
-            >
-              تقييم المناظرين | منصة التقييم الرسمي
-            </router-link>
-
-            <!-- Login / User Profile Component -->
-            <AuthNavbar />
-        </header>
-
-
         <div class="max-w-7xl mx-auto px-4 mt-8">
             <!-- Stats Overview Bar -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
@@ -148,7 +132,6 @@
 import { ref, computed, onMounted } from "vue";
 import DebaterMap from "./DebaterMap.vue";
 import { useRouter } from "vue-router";
-import AuthNavbar from './AuthNavbar.vue'
 
 const router = useRouter();
 const debaters = ref([]);

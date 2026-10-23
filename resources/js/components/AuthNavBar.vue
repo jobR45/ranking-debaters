@@ -105,6 +105,8 @@ const userParam = urlParams.get("user");
 if (token && userParam) {
     try {
         const user = JSON.parse(decodeURIComponent(userParam));
+        console.log("Parsed user session:", user);
+        console.log("Received token:", token);
         auth.setAuth(user, token);
         window.history.replaceState(
             {},
@@ -115,11 +117,29 @@ if (token && userParam) {
         console.error("Failed to parse user session", e);
     }
 }
-const handleLogout = () => {
+
+
+const handleLogout = async () => {
+  try {
+    const token = localStorage.getItem('token')
+    if (token) {
+      await fetch('/api/logout', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Accept': 'application/json'
+        }
+      })
+    }
+  } catch (err) {
+    console.error('Logout request failed', err)
+  } finally {
     // Clean up URL parameters
     window.history.replaceState({}, document.title, window.location.pathname);
 
     auth.logout();
     window.location.reload();
-};
+  }
+}   
+
 </script>

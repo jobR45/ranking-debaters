@@ -26,6 +26,9 @@ Route::get('/debaters/{id}', [DebaterController::class, 'show']);
 // Social Auth Endpoints
 Route::get('/auth/{provider}/redirect', [SocialAuthController::class, 'redirect']);
 Route::get('/auth/{provider}/callback', [SocialAuthController::class, 'callback']);
+Route::post('/login', [SocialAuthController::class, 'login']);
+Route::middleware('auth:sanctum')->post('/logout', [SocialAuthController::class, 'logout']);
+
 
 // Authenticated Audience Routes (Logged-in users)
 Route::middleware('auth:sanctum')->group(function () {
@@ -37,7 +40,7 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 });
 
-Route::post('/login', [SocialAuthController::class, 'login']);
+
 
 // Admin-Only Routes
 Route::middleware(['auth:sanctum', EnsureUserIsAdmin::class])->group(function () {

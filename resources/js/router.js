@@ -80,41 +80,18 @@ const router = createRouter({
 router.beforeEach(async (to, from, next) => {
   const auth = useAuth()
 
-  // 1. Resolve OAuth callbacks before using any previously stored identity.
-  const urlParams = new URLSearchParams(window.location.search)
-  const tokenParam = urlParams.get('token')
 
-  if (tokenParam) {
-    auth.logout()
-    window.history.replaceState({}, document.title, window.location.pathname)
-
-    try {
-      const response = await fetch('/api/user/me', {
-        headers: { Authorization: `Bearer ${tokenParam}` }
-      })
-
-      if (!response.ok) {
-        throw new Error(`OAuth user lookup failed with status ${response.status}`)
-      }
-
-      const user = await response.json()
-      auth.setAuth(user, tokenParam)
-    } catch (error) {
-      auth.logout()
-      console.error('Failed to complete OAuth login:', error)
-    }
-  }
-
-  // 2. Always read the LATEST values from localStorage
+  // 1. Always read the LATEST values from localStorage
   const token = localStorage.getItem('token')
   const user = JSON.parse(localStorage.getItem('user') || 'null')
 
   const isUserAuthenticated = !!token
   const isUserAdmin = user && (user.role === 'admin' || user.role === 'super_admin')
 
-  // 3. Validate route permissions
+  // 2. Validate route permissions
   if (to.meta.requiresAdmin) {
     if (!isUserAuthenticated || !isUserAdmin) {
+      console.warn('Access denied: Admin route requires authentication and admin role.')
       auth.logout()
       return next({ name: 'AdminLogin' })
     }
@@ -125,10 +102,12 @@ router.beforeEach(async (to, from, next) => {
         headers: { Authorization: `Bearer ${token}` }
       })
       if (!res.ok) {
+        console.warn('Token validation failed. Logging out.')
         auth.logout()
         return next({ name: 'AdminLogin' })
       }
     } catch (err) {
+      console.error('Error validating token:', err)
       auth.logout()
       return next({ name: 'AdminLogin' })
     }

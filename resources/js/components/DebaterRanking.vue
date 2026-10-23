@@ -148,7 +148,7 @@ const fetchDebaters = async () => {
 };
 
 const goToDebater = (id) => {
-    router.push({ name: "debater.show", params: { id } });
+    router.push({ name: "DebaterProfile", params: { id } });
 };
 
 const formatDate = (dateStr) => {

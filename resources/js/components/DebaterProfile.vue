@@ -442,6 +442,7 @@ const ratingForm = ref({
     logic: 15,
     victory: 15,
     comment: "",
+    reviewer_name: auth.state.user?.name || "",
 });
 
 const fetchDebater = async () => {
@@ -498,45 +499,6 @@ const fetchAudienceReviews = async (page = 1) => {
     }
 };
 
-const submitAudienceRatingLegacy = async () => {
-    const token = localStorage.getItem("token");
-
-    if (!token || !auth.isAuthenticated.value) {
-        toast.error("يرجى تسجيل الدخول أولاً لإرسال تقييمك.");
-        return;
-    }
-
-    try {
-        const res = await fetch(`/api/debaters/${route.params.id}/reviews`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${token}`,
-            },
-            body: JSON.stringify(ratingForm.value),
-        });
-
-        const data = await res.json();
-
-        if (res.ok) {
-            toast.success(data.message || "تم إرسال تقييمك بنجاح!");
-            ratingForm.value = {
-                reviewer_name: "",
-                etiquette: 15,
-                knowledge: 15,
-                logic: 15,
-                victory: 15,
-                comment: "",
-            };
-            await fetchAudienceReviews();
-        } else {
-            toast.error(data.message || "حدث خطأ أثناء حفظ التقييم.");
-        }
-    } catch (err) {
-        console.error("Error submitting audience review:", err);
-        toast.error("تعذر الاتصال بالخادم.");
-    }
-};
 
 const resetReviewForm = () => {
     ratingForm.value = {
@@ -545,6 +507,7 @@ const resetReviewForm = () => {
         logic: 15,
         victory: 15,
         comment: "",
+        reviewer_name: auth.state.user?.name || "",
     };
     isEditingReview.value = false;
     editingReviewId.value = null;
@@ -564,6 +527,7 @@ const openEditReview = (review) => {
         logic: review.logic,
         victory: review.victory,
         comment: review.comment || "",
+        reviewer_name: auth.state.user?.name || "",
     };
     reviewDialogVisible.value = true;
 };

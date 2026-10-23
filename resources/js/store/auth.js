@@ -39,7 +39,6 @@ const setAuth = (userData, tokenData) => {
     logout,
     isAuthenticated,
     isAdmin,
-    isUser: computed(() => state.user && state.user.role === 'user'),
     isSuperAdmin
   }
 }

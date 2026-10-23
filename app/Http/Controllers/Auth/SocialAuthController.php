@@ -61,8 +61,8 @@ class SocialAuthController extends Controller
 
         try {
             $driver = Socialite::driver($provider);
-            $socialUser = method_exists($driver, 'stateless') 
-                ? $driver->stateless()->user() 
+            $socialUser = method_exists($driver, 'stateless')
+                ? $driver->stateless()->user()
                 : $driver->user();
         } catch (\Exception $e) {
             return redirect('/?error=auth_failed');
@@ -104,5 +104,23 @@ class SocialAuthController extends Controller
 
         // Redirect back to frontend SPA with BOTH token and user object
         return redirect("/?token={$token}&user={$userData}");
+    }
+
+    public function logout(Request $request)
+    {
+        $token = $request->user()->currentAccessToken();
+
+        // Check if it's a database token (PersonalAccessToken) and not a session transient token
+        if (method_exists($token, 'delete')) {
+            $token->delete();
+        } else {
+            // If it's a session request, revoke all tokens or clear web session
+            $request->user()->tokens()->delete();
+            Auth::guard('web')->logout();
+        }
+
+        return response()->json([
+            'message' => 'تم تسجيل الخروج بنجاح'
+        ]);
     }
 }
